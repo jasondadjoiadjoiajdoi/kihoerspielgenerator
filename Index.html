@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KI Sänger 🎤</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #121212;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 10px;
+    }
+    .app {
+      width: 100%;
+      max-width: 450px;
+      padding: 20px;
+      background: #222;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.6);
+    }
+    h2 { text-align: center; margin-bottom: 15px; }
+    textarea, select, button {
+      width: 100%;
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      font-size: 16px;
+    }
+    textarea { resize: vertical; min-height: 100px; }
+    button {
+      background: #00ccff;
+      color: #000;
+      font-weight: bold;
+      font-size: 16px;
+      margin-top: 15px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    button:hover { background: #00ffaa; }
+    audio { width: 100%; margin-top: 20px; border-radius: 10px; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h2>🎤 KI-Sänger</h2>
+
+    <textarea id="text" placeholder="Gib hier deinen Songtext ein..."></textarea>
+
+    <label for="voiceStyle">Stimme auswählen:</label>
+    <select id="voiceStyle">
+      <option value="pop_male">Pop (männlich)</option>
+      <option value="pop_female">Pop (weiblich)</option>
+      <option value="rock_male">Rock (männlich)</option>
+      <option value="rock_female">Rock (weiblich)</option>
+      <option value="electro_male">Electronic (männlich)</option>
+      <option value="electro_female">Electronic (weiblich)</option>
+      <option value="rap_male">Rap (männlich)</option>
+      <option value="rap_female">Rap (weiblich)</option>
+      <option value="soft_male">Sanft (männlich)</option>
+      <option value="soft_female">Sanft (weiblich)</option>
+      <option value="opera_male">Oper (männlich)</option>
+      <option value="opera_female">Oper (weiblich)</option>
+    </select>
+
+    <button onclick="generateAudio()">🎶 MP3 erstellen</button>
+
+    <audio id="player" controls></audio>
+  </div>
+
+  <script>
+    async function generateAudio() {
+      const text = document.getElementById('text').value.trim();
+      if (!text) return alert("Bitte zuerst einen Text eingeben 🙂");
+
+      const style = document.getElementById('voiceStyle').value;
+
+      try {
+        const response = await fetch("https://api.speechify.com/v1/speech", {
+          method: "POST",
+          headers: {
+            "Authorization": "Bearer v1:ATYVSdpjMH-SGLTYzib5qfDDkcPg43DJoQdO9cI17evArRMM0Ru0gsxC0_8",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            text: text,
+            voice: style,
+            format: "mp3"
+          })
+        });
+
+        if (!response.ok) {
+          const err = await response.json();
+          console.error(err);
+          return alert("Fehler bei der API: " + JSON.stringify(err));
+        }
+
+        const audioBlob = await response.blob();
+        const url = URL.createObjectURL(audioBlob);
+        const player = document.getElementById("player");
+        player.src = url;
+        player.play();
+
+      } catch (err) {
+        console.error(err);
+        alert("Verbindungsfehler 😕");
+      }
+    }
+  </script>
+</body>
+</html>
